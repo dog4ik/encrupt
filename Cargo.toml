@@ -1,0 +1,15 @@
+[package]
+name = "encrypt"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.5"
+rsa = "0.9.6"
+anyhow = "1.0.79"
+clap = { version = "4.4.18", features = ["derive"] }
+crypto = { version = "0.5.1", features = ["universal-hash", "password-hash", "digest", "std", "cipher"] }
+sha2 = "0.10.8"
+aes-gcm = "0.10.3"
