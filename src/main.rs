@@ -1,5 +1,6 @@
 use aes_gcm::aead::Aead;
 use aes_gcm::{Aes256Gcm, Key, KeyInit, Nonce};
+use anyhow::anyhow;
 use clap::Parser;
 use std::fs::OpenOptions;
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -47,7 +48,9 @@ fn encrypt(file: impl AsRef<Path>, passphrase: &str) -> anyhow::Result<()> {
     let mut read_buffer = Vec::with_capacity(metadata.len() as usize);
 
     file.read_to_end(&mut read_buffer)?;
-    let ciphertext = cipher.encrypt(&nonce, read_buffer.as_ref())?;
+    let ciphertext = cipher
+        .encrypt(&nonce, read_buffer.as_ref())
+        .map_err(|_| anyhow!("Failed to encrypt the file"))?;
     file.set_len(0)?;
     file.seek(SeekFrom::Start(0))?;
     file.write_all(&ciphertext)?;
@@ -67,7 +70,10 @@ fn decrypt(file: impl AsRef<Path>, passphrase: &str) -> anyhow::Result<()> {
     let mut read_buffer = Vec::with_capacity(metadata.len() as usize);
 
     file.read_to_end(&mut read_buffer)?;
-    let decrypted = cipher.decrypt(&nonce, read_buffer.as_ref())?;
+    let decrypted = cipher
+        .decrypt(&nonce, read_buffer.as_ref())
+        .map_err(|_| anyhow!("Failed to decrypt the file"))?;
+
     file.set_len(0)?;
     file.seek(SeekFrom::Start(0))?;
     file.write_at(&decrypted, 0)?;
